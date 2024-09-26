@@ -51,29 +51,32 @@ func main() {
 
 		if len(tableBody.Nodes) == 0 {
 			fmt.Println("Unable to find the Lunch Menu for", weekday)
-		}
+		} else {
 
-		tableBody.Each(func(i int, tableBodies *goquery.Selection) {
-			tableBodies.Find("tr").Each(func(i int, tableRows *goquery.Selection) {
-				menuOption := MenuOption{}
-				menuOption.Heading = tableRows.Find("th").Text()
-				tableRows.Find("div [class='menu-item-entry']").Each(func(i int, menuItemEntries *goquery.Selection) {
+			tableBody.Each(func(i int, tableBodies *goquery.Selection) {
+				tableBodies.Find("tr").Each(func(i int, tableRows *goquery.Selection) {
+					menuOption := MenuOption{}
+					menuOption.Heading = tableRows.Find("th").Text()
+					tableRows.Find("div [class='menu-item-entry']").Each(func(i int, menuItemEntries *goquery.Selection) {
 
-					// most menu items are links but "water" isn't as everyone knows what that is
-					if menuItemEntries.Children().Length() > 1 {
-						menuItemEntries.Find("a").Each(func(i int, s4 *goquery.Selection) {
-							menuOption.AddItem(s4.Text())
-						})
-					} else {
-						// water
-						menuOption.AddItem(menuItemEntries.Text())
-					}
+						// most menu items are links but "water" isn't as everyone knows what that is
+						if menuItemEntries.Children().Length() > 1 {
+							menuItemEntries.Find("a").Each(func(i int, s4 *goquery.Selection) {
+								menuOption.AddItem(s4.Text())
+							})
+						} else {
+							// water
+							menuOption.AddItem(menuItemEntries.Text())
+						}
+					})
+					menu.AddMeal(menuOption)
 				})
-				menu.AddMeal(menuOption)
 			})
-		})
 
-		fmt.Println(menu)
+			fmt.Println(menu)
+			// todo: compare todays menu with what jack likes
+			// send email or something
+		}
 
 	})
 
