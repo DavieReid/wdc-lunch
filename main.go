@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -28,8 +30,23 @@ func (menu *Menu) AddMeal(menuOption MenuOption) []MenuOption {
 	return menu.Meals
 }
 
+func favesFromFile(file string) ([]string, error) {
+	defer log.Printf("---------")
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	tok := make([]string, 0)
+	err = json.NewDecoder(f).Decode(&tok)
+
+	log.Println("Read favourite foods: ", file)
+
+	return tok, err
+}
+
 func main() {
-	weekday := time.Now().Weekday()
+	weekday := time.Now().Add(time.Hour).Weekday()
 
 	if weekday == time.Saturday || weekday == time.Sunday {
 		fmt.Println("It's the weekend, no packed lunch needed!")
@@ -73,9 +90,33 @@ func main() {
 				})
 			})
 
-			fmt.Println(menu)
-			// todo: compare todays menu with what jack likes
-			// send email or something
+			faves, err := favesFromFile("./favs.json")
+
+			if err != nil {
+				fmt.Println("Whoops we don't know what Jack likes")
+			}
+
+			needPackedLunch := true
+			for _, fave := range faves {
+				for i := range menu.Meals {
+					options := menu.Meals[i].Options
+					for _, option := range options {
+						if option == fave {
+							fmt.Println("Found", option)
+							needPackedLunch = false
+							break
+						}
+					}
+				}
+			}
+
+			if needPackedLunch {
+				fmt.Println("A packed lunch is needed!")
+				// send saying we need packed lunch
+			} else {
+				fmt.Println("No packed lunch is needed!")
+				// send saying we don't packed lunch
+			}
 		}
 
 	})
