@@ -46,10 +46,11 @@ func favesFromFile(file string) ([]string, error) {
 }
 
 func main() {
-	weekday := time.Now().Add(time.Hour).Weekday()
+	weekday := time.Now().Weekday()
 
 	if weekday == time.Saturday || weekday == time.Sunday {
 		fmt.Println("It's the weekend, no packed lunch needed!")
+		os.Exit(0)
 	}
 
 	fmt.Println("Getting Lunch Menu for: ", weekday)
